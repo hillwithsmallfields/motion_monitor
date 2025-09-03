@@ -43,24 +43,28 @@ def get_motion_config_filename():
     """Get the filename in current use as a motion config."""
     motions = get_live_command_lines_matching("motion")
     if len(motions) > 1:
-        raise RuntimeError("More than one motion process")
+         RuntimeError("More than one motion process")
     if len(motions) == 0:
         raise RuntimeError("No motion process")
     return get_option_value(motions[0], "-c")
 
 def get_config_value(filename, key):
     """Get a value from a motion config filename."""
-    with open(filename) as instream:
-        for line in instream:
-            parts = line.split()
-            if parts:
-                if parts[0] == key:
-                    return parts[1]
+    if filename and os.path.exists(filename):
+        with open(filename) as instream:
+            for line in instream:
+                parts = line.split()
+                if parts:
+                    if parts[0] == key:
+                        return parts[1]
     return None
 
 def get_clips_directory():
     """Get the clips directory in current use."""
-    return get_config_value(get_motion_config_filename(), "target_dir")
+    try:
+        return get_config_value(get_motion_config_filename(), "target_dir")
+    except RuntimeError:
+        return None
 
 def run_on_host(hostname, command):
     """Run a command on a specified host."""
