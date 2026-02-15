@@ -11,7 +11,7 @@ import sys
 import subprocess
 import time
 
-import managed_directory
+from motion_monitor import managed_directory
 
 def get_args():
     parser = argparse.ArgumentParser()
