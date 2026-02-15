@@ -14,15 +14,32 @@ def file_details(filename):
             'size': stat.st_size,
             'created': datetime.datetime.fromtimestamp(stat.st_mtime).isoformat()}
 
-def full_filenames(directory):
-    """Return the full names of all the regular files in a directory."""
+def full_filenames(directory, matching=None):
+    """Return the full names of all the regular files in a directory.
+    A matching function can be given, taking the filename as its only argument."""
     return [s for s in (os.path.join(directory, r)
                         for r in os.listdir(directory))
-            if os.path.isfile(s)]
+            if (os.path.isfile(s)
+                and (matching is None
+                     or matching(s)))]
 
-def get_files_details(directory):
-    """Return the details of all the regular files in a directory."""
-    return [file_details(s) for s in full_filenames(directory)]
+def get_files_details(directory, matching=None):
+    """Return the details of all the regular files in a directory.
+    A matching function can be given, taking the filename as its only argument."""
+    return [file_details(s) for s in full_filenames(directory, matching=matching)]
+
+def recent_files_in_directory(directory, within_seconds=24*60*60, matching=None):
+    """Return a list of the files in a directory that were modified within a given period.
+    The period is given in seconds.  The default period is one day.
+    A matching function can be given, taking the filename as its only argument."""
+    cutoff = time.time() - within_seconds
+    filenames = full_filenames(directory, matching=matching)
+    print("recent_files_in_directory got", len(filenames), "before trimming by time")
+    trimmed = [file_details(name)
+               for name in filenames
+               if os.stat(name).st_mtime > cutoff]
+    print("recent_files_in_directory got", len(trimmed), "after trimming by time")
+    return trimmed
 
 def keep_days_in_directory(directory, keep_days=7):
     """Keep only a given number of days back in a clips directory."""
