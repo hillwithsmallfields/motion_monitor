@@ -7,39 +7,48 @@ import time
 
 import prefixed
 
-def file_details(filename):
-    """Return some details of a file as a dictionary."""
+def file_details(filename, augment=None):
+    """Return some details of a file as a dictionary.
+    With an augment function, call that on the filename and the dictionary
+    to add custom details."""
     stat = os.stat(filename)
-    return {'filename': filename,
-            'size': stat.st_size,
-            'created': datetime.datetime.fromtimestamp(stat.st_mtime).isoformat()}
+    result = {'filename': filename,
+              'size': stat.st_size,
+              'created': datetime.datetime.fromtimestamp(stat.st_mtime).isoformat()}
+    if augment:
+        augment(filename, result)
+    return result
 
 def full_filenames(directory, matching=None):
     """Return the full names of all the regular files in a directory.
     A matching function can be given, taking the filename as its only argument."""
-    return [s for s in (os.path.join(directory, r)
-                        for r in os.listdir(directory))
-            if (os.path.isfile(s)
-                and (matching is None
-                     or matching(s)))]
+    return sorted([s for s in (os.path.join(directory, r)
+                               for r in os.listdir(directory))
+                   if (os.path.isfile(s)
+                       and (matching is None
+                            or matching(s)))])
 
-def get_files_details(directory, matching=None):
+def get_files_details(directory, matching=None, augment=None):
     """Return the details of all the regular files in a directory.
-    A matching function can be given, taking the filename as its only argument."""
-    return [file_details(s) for s in full_filenames(directory, matching=matching)]
+    A matching function can be given, taking the filename as its only argument.
+    With an augment function, call that on the filename and the dictionary
+    to add custom details."""
+    return [file_details(s, augment) for s in full_filenames(directory, matching=matching)]
 
-def recent_files_in_directory(directory, within_seconds=24*60*60, matching=None):
+def recent_files_in_directory(directory,
+                              within_seconds=24*60*60,
+                              matching=None,
+                              augment=None):
     """Return a list of the files in a directory that were modified within a given period.
     The period is given in seconds.  The default period is one day.
-    A matching function can be given, taking the filename as its only argument."""
+    A matching function can be given, taking the filename as its only argument.
+    With an augment function, call that on the filename and the dictionary
+    to add custom details."""
     cutoff = time.time() - within_seconds
     filenames = full_filenames(directory, matching=matching)
-    print("recent_files_in_directory got", len(filenames), "before trimming by time")
-    trimmed = [file_details(name)
-               for name in filenames
-               if os.stat(name).st_mtime > cutoff]
-    print("recent_files_in_directory got", len(trimmed), "after trimming by time")
-    return trimmed
+    return [file_details(name, augment)
+            for name in filenames
+            if os.stat(name).st_mtime > cutoff]
 
 def keep_days_in_directory(directory, keep_days=7):
     """Keep only a given number of days back in a clips directory."""
