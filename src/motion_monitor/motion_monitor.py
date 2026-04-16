@@ -43,7 +43,7 @@ def get_motion_config_filename():
     """Get the filename in current use as a motion config."""
     motions = get_live_command_lines_matching("motion")
     if len(motions) > 1:
-         RuntimeError("More than one motion process")
+         raise RuntimeError("More than one motion process")
     if len(motions) == 0:
         raise RuntimeError("No motion process")
     return get_option_value(motions[0], "-c")
