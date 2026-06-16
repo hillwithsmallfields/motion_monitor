@@ -6,5 +6,4 @@ setup(
     description="Monitor the output of my motion setup.",
     author="John C. G. Sturdy",
     author_email="jcg.sturdy@gmail.com",
-    packages=find_packages(),
 )

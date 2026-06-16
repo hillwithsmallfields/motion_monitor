@@ -6,7 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "motion_monitor"
 authors = [{name = "John C. G. Sturdy", email = "jcg.sturdy@gmail.com"}]
 readme = "README.md"
-license = {file = "LICENSE"}
-classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
+license = "GPL-3.0-or-later"
 version = "0.0.1"
 description = "Monitor the output of my motion setup."
